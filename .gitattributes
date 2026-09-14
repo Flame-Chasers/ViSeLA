@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+*.pth binary
+*.th binary
+*.bin binary
+*.safetensors binary

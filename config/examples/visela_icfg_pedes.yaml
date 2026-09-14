@@ -1,0 +1,108 @@
+# ViSeLA fine-tuning on ICFG-PEDES (multilingual en/ch/fr/de), with MultiPedes pre-training.
+# Reproduces the ViSeLA ICFG-PEDES rows of Table 2. Derived from the exact paper config (config/ablation/icfg+q4+lsp_max+pre.yaml).
+# Edit the placeholder paths: model.resume, text_encoder, data.code_switch_dir, anno_dir, image_dir.
+device: 0
+
+misc:
+  seed: 1
+
+experiment:
+  input_resolution: [224, 224]
+  text_length: 77
+
+schedule:
+  lr: 5.0e-5
+  epoch: 10
+  epoch_warmup: 1
+  lr_start: 1.0e-6
+  lr_end: 5.0e-6
+  weight_decay: 0.02
+  betas: [0.9, 0.98]
+  eps: 1.0e-8
+  ratio_factor: 1.0
+
+refiner:
+  enable_sdm: false
+  num_query: 4
+  num_hidden_layers: 2
+  hidden_size: 768
+  sim_type: "lsp_max"
+  lambda_feat_div: 0
+  lambda_attn_div: 0
+  diversity_mode: "soft"
+  feat_threshold: 0.6
+  attn_threshold: 0.01
+
+model:
+  resume: '/path/to/visela_multipedes_pretrained.th'
+  # To skip MultiPedes pre-training, point resume at the CCLM-X2VLM checkpoint (cclm_x2vlm_base.th) instead.
+  saved_path: 'ckpts/ICFG-PEDES/visela'
+  use_gather: true
+  embed_dim: 256
+  temp: 0.07
+  k_test: 256
+
+itm:
+  weight: 4.0
+  use_mask: false
+
+mim:
+  weight: 4.0
+  use_mim: false
+  mask_ratio: 0.5
+
+mlm:
+  is_mlm: true
+  mask_prob: 0.4
+  max_masks: 12
+  skipgram_prb: 0.2
+  skipgram_size: 3
+
+expert_blocks: [11]
+num_of_experts: 4
+routing_temp: 1.0
+moe_threshold: 0.7
+moe_use_soft: true
+
+sdm:
+  use_sdm: false
+
+id:
+  use_id: false
+
+vision_config: 'config/config_beit2_base.json'
+
+use_clip_vit: false
+
+use_beit_v2: true
+image_res: 224
+patch_size: 16
+
+text_encoder: '/path/to/xlm-roberta-base'
+text_num_hidden_layers: 18
+text_fusion_start_at: 12
+
+use_one_cl_proj_only: false
+
+log:
+  print_period: 200
+
+data:
+  batch_size: 64
+  test_batch_size: 128
+  num_workers: 8
+  # For English-only (Table 3) runs use: languages: [en]
+  languages: ['en', 'ch', 'fr', 'de']
+
+  # Multilingual code-switch augmentation
+  use_code_switch: true  # enable code-switch augmentation
+  code_switch_dir: '/path/to/ICFG-PEDES/code_switch'   # directory with the code-switch variants
+  code_switch_prob: 0.3   # probability of using an augmented caption (0-1)
+
+distributed:
+  backend: nccl
+  url: 'env://'
+
+# ICFG-PEDES dataset
+anno_dir: '/path/to/ICFG-PEDES/annos'
+image_dir: '/path/to/ICFG-PEDES/imgs'

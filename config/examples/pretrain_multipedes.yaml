@@ -1,0 +1,110 @@
+# ViSeLA pre-training on MultiPedes (8M multilingual image-text pairs) with Pretrain.py.
+# Produces the pre-trained checkpoint used as model.resume by the fine-tuning examples.
+# Edit the placeholder paths: text_encoder and train_file; pass the CCLM-X2VLM checkpoint via --checkpoint.
+accelerator:
+  CLIP_GRAD_NORM: 1.0
+  FP16_LOSS_SCALE: dynamic
+  FP16_OPT_LEVEL: O0
+  GRAD_ACCUMULATE_STEPS: 1
+  RNG_SEED: 42
+  SYNCBN: false
+calc_image_bbox_loss: false
+ckpt_frequent: 1
+ckpt_frequent_step: 10000
+expert_blocks:
+- 11
+moe:
+  type: semantic  # standard | semantic | language
+  top_k: 2  # top-k experts for the standard MoE
+  lang_expert_map:  # language -> expert mapping for the language MoE
+    en: 0
+    zh: 1
+    de: 2
+    fr: 3
+id:
+  use_id: false
+image_res: 224
+images:
+  batch_size: 72
+  caption_key: caption
+  expand_all_languages: true
+  image_key: binary
+  is_image_rpath: true
+  iter_perc: 1.0
+  num_workers: 8
+  tokenized: false
+is_xvlm_ckpt: true
+itm:
+  use_mask: false
+  weight: 1.0
+mask_prob: 0.4
+mask_whole_word: false
+max_masks: 10
+max_tokens: 30
+max_words: 30
+mim:
+  mask_ratio: 0.5
+  use_mim: false
+  weight: 0.0
+mixed_in_batch: true
+mlm:
+  is_mlm: true
+  mask_prob: 0.4
+  max_masks: 10
+  skipgram_prb: 0.2
+  skipgram_size: 3
+model:
+  embed_dim: 256
+  resume: ''
+  temp: 0.07
+model_type: XVLMPretrain
+moe_threshold: 0.7
+moe_use_soft: true
+num_of_experts: 4
+optimizer:
+  cross_lr: 2e-5
+  lr: 2e-5
+  lr_mult: 2
+  opt: adamW
+  text_lr: 4e-5
+  vision_lr: 1e-5
+  weight_decay: 0.01
+patch_size: 16
+refiner:
+  attn_threshold: 0.01
+  diversity_mode: soft
+  enable: true
+  enable_sdm: false
+  feat_threshold: 0.6
+  hidden_size: 768
+  lambda_attn_div: 0.0
+  lambda_feat_div: 0.0
+  num_hidden_layers: 2
+  num_query: 4
+  sim_type: lsp_max
+replace_text_encoder: false
+routing_temp: 1.0
+schedular:
+  epochs: 2
+  num_warmup_steps: 500
+  sched: linear
+sdm:
+  use_sdm: false
+skipgram_prb: 0.2
+skipgram_size: 3
+text_encoder: /path/to/xlm-roberta-base
+text_fusion_start_at: 12
+text_num_hidden_layers: 18
+# Epoch sampling budget, retained from the experiment config; MultiPedes has 8M pairs.
+# Pretrain.py uses ceil(train_dataset_size / (images.batch_size * world_size))
+# steps per epoch over repeating shards, sampling one caption per image visit.
+# At 72 samples/GPU on 4 GPUs this is 34,723 steps/epoch (69,446 over 2 epochs).
+train_dataset_size: 10000000
+train_file:  # list every MultiPedes shard here
+- /path/to/MultiPedes/multipedes_00000.jsonl
+- /path/to/MultiPedes/multipedes_00001.jsonl
+train_file_mtext: []
+train_file_regions: []
+use_beit_v2: true
+vision_config: config/config_beit2_base.json
+xvlm_ckpt_text_num_hidden_layers: 12

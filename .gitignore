@@ -1,0 +1,52 @@
+### Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+### Build and packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+### Test and type-check caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+### Local environments
+.env
+.venv/
+venv/
+env/
+
+### Editors and OS files
+.idea/
+.vscode/
+.DS_Store
+.ipynb_checkpoints/
+
+### Datasets, checkpoints, and run outputs
+ckpts/
+output/
+outputs/
+logs/
+data/
+wandb/
+*.pth
+*.pt
+*.th
+*.ckpt
+*.bin
+*.safetensors
+*.log
+
+### Files written to the working directory by Pretrain.py
+/config.yaml
+/log.txt
+
+### Local copies of the example configs
+local_*.yaml
